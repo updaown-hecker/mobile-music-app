@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -25,7 +26,6 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.updaown.musicapp.data.AppDatabase
 import com.updaown.musicapp.data.ImportRepository
-import com.updaown.musicapp.data.MusicRepository
 import com.updaown.musicapp.data.Song
 import com.updaown.musicapp.service.MusicService
 import com.updaown.musicapp.ui.theme.AppleDarkGray
@@ -42,7 +42,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getDatabase(application)
     private val importRepository = ImportRepository(application, db)
-    private val repository = MusicRepository(application)
     private val settingsRepository = com.updaown.musicapp.data.SettingsRepository(application)
 
     // Settings state
@@ -60,10 +59,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var searchQuery by mutableStateOf("")
         private set
 
+    // Current playback queue (library, folder, playlist, favorites)
+    private var activeQueue = listOf<Song>()
+
     init {
-        // Observe settings
+        // Ensure settings row exists and observe changes
         viewModelScope.launch {
-            settingsRepository.settingsFlow.collect { settingsEntity -> settings = settingsEntity }
+            val existing = settingsRepository.getSettingsSync()
+            settings = existing
+            settingsRepository.settingsFlow.collect { settingsEntity ->
+                settings = settingsEntity
+                applyPlaybackSettings(settingsEntity)
+                repeatMode = settingsEntity.repeatMode
+                isShuffleEnabled = settingsEntity.shuffleEnabled
+                applyFilter()
+            }
         }
 
         // Observe DB for library songs
@@ -109,17 +119,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyFilter() {
-        songs.clear()
-        if (searchQuery.isBlank()) {
-            songs.addAll(allDbSongs)
-        } else {
-            songs.addAll(
+        val filtered =
+                if (searchQuery.isBlank()) {
+                    allDbSongs
+                } else {
                     allDbSongs.filter {
-                        it.title.contains(searchQuery, ignoreCase = true) ||
-                                it.artist.contains(searchQuery, ignoreCase = true)
+                        it.displayTitle.contains(searchQuery, ignoreCase = true) ||
+                                it.displayArtist.contains(searchQuery, ignoreCase = true)
                     }
-            )
-        }
+                }
+
+        val sorted =
+                when (settings?.sortOrder ?: "Title") {
+                    "Artist" -> filtered.sortedBy { it.displayArtist.lowercase() }
+                    "Album" -> filtered.sortedBy { it.displayAlbum.lowercase() }
+                    "DateAdded" -> filtered.sortedByDescending { it.id }
+                    else -> filtered.sortedBy { it.displayTitle.lowercase() }
+                }
+
+        songs.clear()
+        songs.addAll(sorted)
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -283,6 +302,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 isShuffleEnabled = savedSettings.shuffleEnabled
                 p.repeatMode = savedSettings.repeatMode
                 repeatMode = savedSettings.repeatMode
+                applyPlaybackSettings(savedSettings)
             }
 
             if (p.currentMediaItem != null) {
@@ -328,13 +348,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleShuffle() {
         player?.let {
             val newMode = !it.shuffleModeEnabled
-
-            // Just toggle the mode on the player.
-            // ExoPlayer will handle shuffling the EXISTING queue internally.
             it.shuffleModeEnabled = newMode
             isShuffleEnabled = newMode
-
-            // Persist to database
             viewModelScope.launch { settingsRepository.updateShuffleEnabled(newMode) }
         }
     }
@@ -403,15 +418,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val index = playlist.indexOf(song)
         if (index == -1) return
 
+        activeQueue = playlist.toList()
+
         val mediaItems =
-                playlist.map {
+                activeQueue.map {
                     MediaItem.Builder().setMediaId(it.id.toString()).setUri(it.contentUri).build()
                 }
 
         player?.setMediaItems(mediaItems, index, 0)
         player?.prepare()
-        // Set repeat mode to ALL so it plays through the playlist and loops
-        player?.repeatMode = Player.REPEAT_MODE_ALL
+
+        val currentSettings = settings ?: com.updaown.musicapp.data.SettingsEntity()
+        player?.shuffleModeEnabled = currentSettings.shuffleEnabled
+        isShuffleEnabled = currentSettings.shuffleEnabled
+        player?.repeatMode = currentSettings.repeatMode
+        repeatMode = currentSettings.repeatMode
         player?.play()
         currentSong = song
         extractColors(song)
@@ -420,8 +441,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun shufflePlay(playlist: List<Song>) {
         if (playlist.isEmpty()) return
 
+        activeQueue = playlist.toList()
+
         val mediaItems =
-                playlist.map {
+                activeQueue.map {
                     MediaItem.Builder().setMediaId(it.id.toString()).setUri(it.contentUri).build()
                 }
 
@@ -430,8 +453,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isShuffleEnabled = true
         player?.prepare()
         player?.repeatMode = Player.REPEAT_MODE_ALL
+        repeatMode = Player.REPEAT_MODE_ALL
         player?.play()
-        // currentSong will be updated by the player listener
+        viewModelScope.launch { settingsRepository.updateShuffleEnabled(true) }
     }
 
     private fun extractColors(song: Song) {
@@ -507,6 +531,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (minutes == 0) {
             sleepTimerActive = false
             sleepTimerMinutesRemaining = 0
+            val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(sleepTimerMinutes = 0)
+            updateAllSettings(updated)
             return
         }
 
@@ -531,52 +557,57 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
 
-        // Persist to database
-        viewModelScope.launch { settingsRepository.updateSleepTimer(minutes) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(sleepTimerMinutes = minutes)
+        updateAllSettings(updated)
     }
 
     fun updateEqualizerEnabled(enabled: Boolean) {
-        viewModelScope.launch { settingsRepository.updateEqualizerEnabled(enabled) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(equalizerEnabled = enabled)
+        updateAllSettings(updated)
     }
 
     fun updateEqualizerPreset(preset: String) {
-        viewModelScope.launch { settingsRepository.updateEqualizerPreset(preset) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(equalizerPreset = preset)
+        updateAllSettings(updated)
     }
 
     fun updateBass(value: Int) {
-        viewModelScope.launch { settingsRepository.updateBass(value) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(bass = value)
+        updateAllSettings(updated)
     }
 
     fun updateTreble(value: Int) {
-        viewModelScope.launch { settingsRepository.updateTreble(value) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(treble = value)
+        updateAllSettings(updated)
     }
 
     fun updateMidrange(value: Int) {
-        viewModelScope.launch { settingsRepository.updateMidrange(value) }
+        val updated = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(midrange = value)
+        updateAllSettings(updated)
     }
 
     fun updateAllSettings(newSettings: com.updaown.musicapp.data.SettingsEntity) {
-        // Update local state for immediate UI response
+        val previous = settings ?: com.updaown.musicapp.data.SettingsEntity()
         settings = newSettings
 
-        // Apply shuffle to player if changed
-        if (newSettings.shuffleEnabled != (settings?.shuffleEnabled ?: false)) {
+        if (newSettings.shuffleEnabled != previous.shuffleEnabled) {
             player?.shuffleModeEnabled = newSettings.shuffleEnabled
             isShuffleEnabled = newSettings.shuffleEnabled
         }
 
-        // Apply volume normalization
-        if (newSettings.volumeNormalization != (settings?.volumeNormalization ?: false)) {
-            // TODO: Implement volume normalization audio processing
+        if (newSettings.repeatMode != previous.repeatMode) {
+            player?.repeatMode = newSettings.repeatMode
+            repeatMode = newSettings.repeatMode
         }
 
-        // Apply gapless playback setting
-        if (newSettings.gaplessPlayback != (settings?.gaplessPlayback ?: false)) {
-            // Media3 handles this automatically if supported
-        }
+        applyPlaybackSettings(newSettings)
 
-        // Persist to database
         viewModelScope.launch { settingsRepository.updateSettings(newSettings) }
+    }
+
+    private fun applyPlaybackSettings(currentSettings: com.updaown.musicapp.data.SettingsEntity) {
+        player?.setPlaybackParameters(PlaybackParameters(currentSettings.playbackSpeed.coerceIn(0.5f, 2.0f)))
+        player?.skipSilenceEnabled = currentSettings.skipSilence
     }
 
     fun checkForUpdates() {

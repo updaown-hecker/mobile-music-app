@@ -12,6 +12,8 @@ data class SettingsEntity(
     val repeatMode: Int = 0, // 0 = OFF, 1 = ONE, 2 = ALL
     val gaplessPlayback: Boolean = true,
     val crossfadeDuration: Int = 0, // 0-6 seconds
+    val playbackSpeed: Float = 1.0f,
+    val skipSilence: Boolean = false,
     
     // Audio
     val volumeNormalization: Boolean = false,
