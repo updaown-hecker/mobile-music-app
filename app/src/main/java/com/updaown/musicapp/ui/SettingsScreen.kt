@@ -59,6 +59,7 @@ import com.updaown.musicapp.ui.theme.SamsungBlue
 import com.updaown.musicapp.ui.theme.SamsungDarkGray
 import com.updaown.musicapp.ui.theme.SamsungLightGray
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val settings = viewModel.settings ?: SettingsEntity()
