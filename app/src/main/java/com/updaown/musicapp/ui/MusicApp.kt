@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.updaown.musicapp.ui.theme.AppleSystemBlue
+import com.updaown.musicapp.ui.theme.MusicAppTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -55,6 +56,8 @@ fun MusicApp() {
 
     val permissionState = rememberMultiplePermissionsState(permissions)
 
+    val settings = viewModel.settings
+
     // Auto-launch request on start if not granted
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
@@ -70,6 +73,10 @@ fun MusicApp() {
         }
     }
 
+    MusicAppTheme(
+        darkTheme = settings?.darkThemeEnabled ?: true,
+        amoledTheme = settings?.amoledTheme ?: false
+    ) {
     if (viewModel.permissionGranted || permissionState.allPermissionsGranted) {
         // Handle system back button
         BackHandler(enabled = backStack.isNotEmpty()) {
@@ -137,4 +144,5 @@ fun MusicApp() {
             }
         }
     }
+}
 }
