@@ -608,6 +608,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun applyPlaybackSettings(currentSettings: com.updaown.musicapp.data.SettingsEntity) {
         player?.setPlaybackParameters(PlaybackParameters(currentSettings.playbackSpeed.coerceIn(0.5f, 2.0f)))
         // Skip-silence is persisted in settings; runtime toggle requires ExoPlayer-specific API on this controller path.
+        player?.skipSilenceEnabled = currentSettings.skipSilence
     }
 
     fun checkForUpdates() {
