@@ -1,6 +1,32 @@
-# Default ignored files
-/shelf/
-/workspace.xml
-/build/
-/.idea/
-/app/build/
+# --- Android / IntelliJ / Studio ---
+.idea/
+.gradle/
+build/
+app/build/
+*.iml
+local.properties
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+*.keystore
+!debug.keystore
+
+# --- Giant Memory Dumps (The file that blocked your push) ---
+*.hprof
+
+# --- Kotlin / Java ---
+*.class
+bin/
+gen/
+
+# --- Logs ---
+*.log
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+
+# --- Gradle Caches ---
+.gradle/
+.gradle-cache/
