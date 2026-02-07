@@ -13,45 +13,53 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme =
     darkColorScheme(
-        primary = SamsungBlue,
+        primary = AppleSystemBlue,
         secondary = AppleGray,
         tertiary = AppleSystemPink,
-        background = SamsungBlack,
-        surface = SamsungBlack,
+        background = AppleCharcoal,
+        surface = AppleGraphite,
         onPrimary = AppleWhite,
-        onSecondary = AppleWhite,
+        onSecondary = AppleSilver,
         onTertiary = AppleWhite,
         onBackground = AppleWhite,
         onSurface = AppleWhite,
-        surfaceVariant = SamsungDarkGray
+        surfaceVariant = AppleSlate,
+        outline = AppleSlate,
+        outlineVariant = AppleDarkGray
     )
 
 private val AmoledDarkColorScheme =
     darkColorScheme(
-        primary = SamsungBlue,
+        primary = AppleSystemBlue,
         secondary = AppleGray,
         tertiary = AppleSystemPink,
         background = androidx.compose.ui.graphics.Color.Black,
-        surface = androidx.compose.ui.graphics.Color.Black,
+        surface = AppleCharcoal,
         onPrimary = AppleWhite,
-        onSecondary = AppleWhite,
+        onSecondary = AppleSilver,
         onTertiary = AppleWhite,
         onBackground = AppleWhite,
         onSurface = AppleWhite,
-        surfaceVariant = SamsungDarkGray
+        surfaceVariant = AppleGraphite,
+        outline = AppleSlate,
+        outlineVariant = AppleDarkGray
     )
 
 private val LightColorScheme =
     lightColorScheme(
         primary = AppleSystemBlue,
         secondary = AppleGray,
+        tertiary = AppleSystemPink,
         background = AppleLightGray,
         surface = AppleWhite,
         onPrimary = AppleWhite,
         onSecondary = AppleDarkGray,
+        onTertiary = AppleWhite,
         onBackground = AppleDarkGray,
         onSurface = AppleDarkGray,
-        surfaceVariant = Color(0xFFE8E8ED)
+        surfaceVariant = Color(0xFFE8E8ED),
+        outline = Color(0xFFE5E5EA),
+        outlineVariant = Color(0xFFF2F2F7)
     )
 
 @Composable

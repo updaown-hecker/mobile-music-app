@@ -25,6 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.updaown.musicapp.data.PlaylistEntity
@@ -63,64 +66,92 @@ fun SongList(
 @Composable
 fun SongItemCard(song: Song, onSongClick: () -> Unit, onEditClick: () -> Unit = {}) {
         Row(
-                modifier =
-                        Modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(SamsungDarkGray)
-                                .clickable { onSongClick() }
-                                .padding(14.dp),
+                modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(AppleGraphite)
+                        .clickable { onSongClick() }
+                        .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-                // Album art with default placeholder
+                // Album art with enhanced styling
                 Box(
-                        modifier =
-                                Modifier.size(56.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(SamsungBlack),
+                        modifier = Modifier
+                                .size(60.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(AppleCharcoal)
+                                .shadow(
+                                        elevation = 4.dp,
+                                        shape = RoundedCornerShape(12.dp),
+                                        ambientColor = Color.Black.copy(alpha = 0.3f)
+                                ),
                         contentAlignment = Alignment.Center
                 ) {
                         AsyncImage(
-                                model =
-                                        ImageRequest.Builder(LocalContext.current)
-                                                .data(song.displayAlbumArt)
-                                                .crossfade(true)
-                                                .build(),
-                                contentDescription = null,
+                                model = ImageRequest.Builder(LocalContext.current)
+                                        .data(song.displayAlbumArt)
+                                        .crossfade(true)
+                                        .placeholder(android.R.drawable.ic_media_play)
+                                        .error(android.R.drawable.ic_media_play)
+                                        .build(),
+                                contentDescription = "Album Art",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(56.dp)
+                                modifier = Modifier.size(60.dp)
                         )
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
                         Text(
-                                song.displayTitle,
-                                style =
-                                        MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.SemiBold
-                                        ),
+                                text = song.displayTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Medium,
+                                        letterSpacing = 0.1.sp
+                                ),
                                 color = AppleWhite,
-                                maxLines = 1
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                                song.displayArtist,
-                                style = MaterialTheme.typography.bodySmall,
+                                text = song.displayArtist,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                        letterSpacing = 0.2.sp
+                                ),
                                 color = AppleGray,
-                                maxLines = 1
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                         )
+                        if (song.displayAlbum.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                        text = song.displayAlbum,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                                letterSpacing = 0.3.sp
+                                        ),
+                                        color = AppleGray.copy(alpha = 0.7f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                )
+                        }
                 }
 
-                IconButton(onClick = onEditClick, modifier = Modifier.size(40.dp)) {
+                IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(AppleSlate)
+                                .size(36.dp)
+                ) {
                         Icon(
                                 Icons.Default.Edit,
                                 contentDescription = "Edit",
-                                tint = SamsungBlue,
-                                modifier = Modifier.size(20.dp)
+                                tint = AppleSystemBlue,
+                                modifier = Modifier.size(18.dp)
                         )
                 }
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable

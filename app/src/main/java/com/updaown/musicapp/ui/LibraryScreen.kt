@@ -18,11 +18,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.updaown.musicapp.data.PlaylistEntity
 import com.updaown.musicapp.data.Song
 import com.updaown.musicapp.ui.theme.*
@@ -250,63 +254,63 @@ fun MainScreen(
                                                                 Alignment.CenterVertically
                                                 ) {
                                                         Text(
-                                                                text = "Library",
-                                                                style =
-                                                                        MaterialTheme.typography
-                                                                                .displayLarge.copy(
-                                                                                fontSize = 32.sp,
-                                                                                fontWeight =
-                                                                                        FontWeight
-                                                                                                .Bold
-                                                                        ),
-                                                                color = AppleWhite
-                                                        )
+                                                        text = "Library",
+                                                        style = MaterialTheme.typography.displayLarge,
+                                                        color = AppleWhite
+                                                )
                                                         Row {
                                                                 IconButton(
-                                                                        onClick =
-                                                                                onNavigateToSettings
-                                                                ) {
-                                                                        Icon(
-                                                                                Icons.Default
-                                                                                        .Settings,
-                                                                                contentDescription =
-                                                                                        "Settings",
-                                                                                tint = SamsungBlue
-                                                                        )
+                                                        onClick = onNavigateToSettings,
+                                                        modifier = Modifier
+                                                                .clip(RoundedCornerShape(12.dp))
+                                                                .background(AppleGraphite)
+                                                                .size(40.dp)
+                                                ) {
+                                                        Icon(
+                                                                Icons.Default.Settings,
+                                                                contentDescription = "Settings",
+                                                                tint = AppleSystemBlue,
+                                                                modifier = Modifier.size(20.dp)
+                                                        )
+                                                }
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                IconButton(
+                                                        onClick = {
+                                                                viewModel.checkForUpdates()
+                                                        },
+                                                        modifier = Modifier
+                                                                .clip(RoundedCornerShape(12.dp))
+                                                                .background(AppleGraphite)
+                                                                .size(40.dp)
+                                                ) {
+                                                        Icon(
+                                                                Icons.Default.Refresh,
+                                                                contentDescription = "Check for Updates",
+                                                                tint = AppleSystemBlue,
+                                                                modifier = Modifier.size(20.dp)
+                                                        )
+                                                }
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                IconButton(
+                                                        onClick = {
+                                                                if (selectedTabIndex == 3) {
+                                                                        showCreateFolderDialog = true
+                                                                } else {
+                                                                        onNavigateToImport()
                                                                 }
-                                                                IconButton(
-                                                                        onClick = {
-                                                                                viewModel
-                                                                                        .checkForUpdates()
-                                                                        }
-                                                                ) {
-                                                                        Icon(
-                                                                                Icons.Default
-                                                                                        .Refresh,
-                                                                                contentDescription =
-                                                                                        "Check for Updates",
-                                                                                tint = SamsungBlue
-                                                                        )
-                                                                }
-                                                                IconButton(
-                                                                        onClick = {
-                                                                                if (selectedTabIndex ==
-                                                                                                3
-                                                                                ) {
-                                                                                        showCreateFolderDialog =
-                                                                                                true
-                                                                                } else {
-                                                                                        onNavigateToImport()
-                                                                                }
-                                                                        }
-                                                                ) {
-                                                                        Icon(
-                                                                                Icons.Default.Add,
-                                                                                contentDescription =
-                                                                                        "Add",
-                                                                                tint = SamsungBlue
-                                                                        )
-                                                                }
+                                                        },
+                                                        modifier = Modifier
+                                                                .clip(RoundedCornerShape(12.dp))
+                                                                .background(AppleSystemBlue)
+                                                                .size(40.dp)
+                                                ) {
+                                                        Icon(
+                                                                Icons.Default.Add,
+                                                                contentDescription = "Add",
+                                                                tint = AppleWhite,
+                                                                modifier = Modifier.size(20.dp)
+                                                        )
+                                                }
                                                         }
                                                 }
 
@@ -315,34 +319,34 @@ fun MainScreen(
                                                         onValueChange = {
                                                                 viewModel.onSearchQueryChanged(it)
                                                         },
-                                                        modifier =
-                                                                Modifier.fillMaxWidth()
-                                                                        .clip(
-                                                                                RoundedCornerShape(
-                                                                                        12.dp
-                                                                                )
-                                                                        ),
-                                                        colors =
-                                                                TextFieldDefaults.colors(
-                                                                        focusedContainerColor =
-                                                                                SamsungDarkGray,
-                                                                        unfocusedContainerColor =
-                                                                                SamsungDarkGray,
-                                                                        disabledContainerColor =
-                                                                                SamsungDarkGray,
-                                                                        focusedIndicatorColor =
-                                                                                Color.Transparent,
-                                                                        unfocusedIndicatorColor =
-                                                                                Color.Transparent,
-                                                                        focusedTextColor =
-                                                                                AppleWhite,
-                                                                        unfocusedTextColor =
-                                                                                AppleWhite
-                                                                ),
+                                                        modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 8.dp)
+                                                                .shadow(
+                                                                        elevation = 2.dp,
+                                                                        shape = RoundedCornerShape(16.dp),
+                                                                        ambientColor = Color.Black.copy(alpha = 0.1f)
+                                                                )
+                                                                .clip(RoundedCornerShape(16.dp)),
+                                                        colors = TextFieldDefaults.colors(
+                                                                focusedContainerColor = AppleGraphite,
+                                                                unfocusedContainerColor = AppleGraphite,
+                                                                disabledContainerColor = AppleGraphite,
+                                                                focusedIndicatorColor = Color.Transparent,
+                                                                unfocusedIndicatorColor = Color.Transparent,
+                                                                focusedTextColor = AppleWhite,
+                                                                unfocusedTextColor = AppleWhite,
+                                                                cursorColor = AppleSystemBlue,
+                                                                selectionColors = TextSelectionColors(
+                                                                        handleColor = AppleSystemBlue,
+                                                                        backgroundColor = AppleSystemBlue.copy(alpha = 0.3f)
+                                                                )
+                                                        ),
                                                         placeholder = {
                                                                 Text(
-                                                                        "Search songs, artists...",
-                                                                        color = AppleGray
+                                                                        "Search songs, artists, albums...",
+                                                                        color = AppleGray,
+                                                                        style = MaterialTheme.typography.bodyMedium
                                                                 )
                                                         },
                                                         leadingIcon = {
@@ -358,11 +362,22 @@ fun MainScreen(
 
                                         ScrollableTabRow(
                                                 selectedTabIndex = selectedTabIndex,
-                                                containerColor = SamsungBlack,
-                                                contentColor = SamsungBlue,
+                                                containerColor = Color.Transparent,
+                                                contentColor = AppleSystemBlue,
                                                 edgePadding = 16.dp,
                                                 divider = {},
-                                                indicator = {}
+                                                indicator = { tabPositions ->
+                                                        if (selectedTabIndex < tabPositions.size) {
+                                                                Box(
+                                                                        modifier = Modifier
+                                                                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                                                                .height(3.dp)
+                                                                                .padding(horizontal = 16.dp)
+                                                                                .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                                                                                .background(AppleSystemBlue)
+                                                                )
+                                                        }
+                                                }
                                         ) {
                                                 tabs.forEachIndexed { index, title ->
                                                         val selected = selectedTabIndex == index
@@ -374,29 +389,14 @@ fun MainScreen(
                                                                 text = {
                                                                         Text(
                                                                                 text = title,
-                                                                                style =
-                                                                                        MaterialTheme
-                                                                                                .typography
-                                                                                                .titleMedium
-                                                                                                .copy(
-                                                                                                        fontWeight =
-                                                                                                                if (selected
-                                                                                                                ) {
-                                                                                                                        FontWeight
-                                                                                                                                .Bold
-                                                                                                                } else {
-                                                                                                                        FontWeight
-                                                                                                                                .Normal
-                                                                                                                }
-                                                                                                ),
-                                                                                color =
-                                                                                        if (selected
-                                                                                        )
-                                                                                                AppleWhite
-                                                                                        else
-                                                                                                AppleGray
+                                                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                                                        fontWeight = if (selected) FontWeight.W600 else FontWeight.W400,
+                                                                                        letterSpacing = 0.2.sp
+                                                                                ),
+                                                                                color = if (selected) AppleWhite else AppleGray
                                                                         )
-                                                                }
+                                                                },
+                                                                modifier = Modifier.padding(horizontal = 8.dp)
                                                         )
                                                 }
                                         }

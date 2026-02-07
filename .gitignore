@@ -9,7 +9,6 @@ local.properties
 captures/
 .externalNativeBuild/
 .cxx/
-*.keystore
 !debug.keystore
 
 # --- Giant Memory Dumps (The file that blocked your push) ---

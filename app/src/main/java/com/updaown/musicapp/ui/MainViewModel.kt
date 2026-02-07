@@ -3,6 +3,7 @@ package com.updaown.musicapp.ui
 import android.app.Application
 import android.content.ComponentName
 import android.graphics.drawable.BitmapDrawable
+import android.os.Bundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -17,6 +18,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import androidx.palette.graphics.Palette
 import coil.ImageLoader
@@ -606,9 +608,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyPlaybackSettings(currentSettings: com.updaown.musicapp.data.SettingsEntity) {
+        // Apply speed (Standard Media3)
         player?.setPlaybackParameters(PlaybackParameters(currentSettings.playbackSpeed.coerceIn(0.5f, 2.0f)))
-        // Skip-silence is persisted in settings; runtime toggle requires ExoPlayer-specific API on this controller path.
-        player?.skipSilenceEnabled = currentSettings.skipSilence
+        
+        // Apply skip silence (Custom Command)
+        val bundle = Bundle().apply { putBoolean("enabled", currentSettings.skipSilence) }
+        player?.sendCustomCommand(SessionCommand("SET_SKIP_SILENCE", Bundle.EMPTY), bundle)
     }
 
     fun checkForUpdates() {

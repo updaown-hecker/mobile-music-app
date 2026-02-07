@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -77,6 +78,7 @@ fun MusicApp() {
         darkTheme = settings?.darkThemeEnabled ?: true,
         amoledTheme = settings?.amoledTheme ?: false
     ) {
+    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
     if (viewModel.permissionGranted || permissionState.allPermissionsGranted) {
         // Handle system back button
         BackHandler(enabled = backStack.isNotEmpty()) {
@@ -117,7 +119,7 @@ fun MusicApp() {
         }
     } else {
         // "Apple-style" Permission Request Screen
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxSize().systemBarsPadding(), contentAlignment = Alignment.Center) {
             Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -140,9 +142,11 @@ fun MusicApp() {
                 Button(
                         onClick = { permissionState.launchMultiplePermissionRequest() },
                         colors = ButtonDefaults.buttonColors(containerColor = AppleSystemBlue)
-                ) { Text("Grant Access") }
+                ) { Text("Grant Access")
             }
         }
     }
+    }
+}
 }
 }
