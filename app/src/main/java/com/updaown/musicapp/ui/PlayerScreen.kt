@@ -30,8 +30,8 @@ import coil.request.ImageRequest
 import com.updaown.musicapp.ui.theme.AppleGray
 import com.updaown.musicapp.ui.theme.AppleSystemBlue
 import com.updaown.musicapp.ui.theme.AppleWhite
-import com.updaown.musicapp.ui.theme.SamsungBlack
-import com.updaown.musicapp.ui.theme.SamsungBlue
+import com.updaown.musicapp.ui.theme.AppleCharcoal
+import com.updaown.musicapp.ui.theme.AppleSystemPink
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -45,8 +45,6 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
         // Metadata Editor State
         var showMetadataEditor by remember { mutableStateOf(false) }
 
-        // Dynamic Animations for Text/Controls ensuring contrast on dark background
-        // We force white text because the background is deep dark "Liquid"
         val contentColor = AppleWhite
         val secondaryColor = AppleGray
 
@@ -82,7 +80,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                 }
                                         )
                                 }
-                                .background(SamsungBlack) // Base
+                                .background(AppleCharcoal) // Base
         ) {
                 // Dynamic Gradient Background (Apple/Modern Style)
                 Box(
@@ -94,7 +92,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                                 listOf(
                                                                         viewModel.dominantColor
                                                                                 .copy(alpha = 0.6f),
-                                                                        SamsungBlack
+                                                                        AppleCharcoal
                                                                 )
                                                 )
                                         )
@@ -156,20 +154,20 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                 .weight(1f)
                                                 .padding(horizontal = 32.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.Top
                         ) {
+                                Spacer(modifier = Modifier.height(20.dp))
                                 // Album Art
                                 Surface(
                                         modifier = Modifier
-                                                .fillMaxWidth(0.8f)
+                                                .fillMaxWidth()
                                                 .aspectRatio(1f)
                                                 .shadow(
                                                         elevation = 40.dp,
-                                                        shape = RoundedCornerShape(24.dp),
-                                                        spotColor = viewModel.dominantColor.copy(alpha = 0.4f),
-                                                        ambientColor = viewModel.dominantColor.copy(alpha = 0.2f)
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        spotColor = Color.Black.copy(alpha = 0.5f)
                                                 )
-                                                .clip(RoundedCornerShape(24.dp)),
+                                                .clip(RoundedCornerShape(12.dp)),
                                         color = Color.Transparent
                                 ) {
                                         AsyncImage(
@@ -185,116 +183,85 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                         )
                                 }
 
-                                Spacer(modifier = Modifier.height(32.dp))
+                                Spacer(modifier = Modifier.height(48.dp))
 
-                                // Title & Artist
-                                Column(
+                                // Title & Artist & Favorite
+                                Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                        Text(
-                                                text = song.title,
-                                                style = MaterialTheme.typography.headlineMedium.copy(
-                                                        fontWeight = FontWeight.Medium,
-                                                        letterSpacing = 0.2.sp
-                                                ),
-                                                color = contentColor,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                                textAlign = TextAlign.Center
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(
-                                                text = song.artist,
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                        letterSpacing = 0.1.sp
-                                                ),
-                                                color = contentColor.copy(alpha = 0.8f),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                textAlign = TextAlign.Center
-                                        )
-                                        if (song.album.isNotEmpty()) {
-                                                Spacer(modifier = Modifier.height(4.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
                                                 Text(
-                                                        text = song.album,
-                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        text = song.title,
+                                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                                                fontWeight = FontWeight.Bold,
+                                                                letterSpacing = (-0.5).sp
+                                                        ),
+                                                        color = contentColor,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                        text = song.artist,
+                                                        style = MaterialTheme.typography.titleMedium,
                                                         color = contentColor.copy(alpha = 0.6f),
                                                         maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        textAlign = TextAlign.Center
+                                                        overflow = TextOverflow.Ellipsis
+                                                )
+                                        }
+
+                                        IconButton(
+                                                onClick = { viewModel.toggleFavorite(song) },
+                                                modifier = Modifier
+                                                        .clip(CircleShape)
+                                                        .background(contentColor.copy(alpha = 0.1f))
+                                                        .size(36.dp)
+                                        ) {
+                                                Icon(
+                                                        imageVector = if (viewModel.favorites.contains(song.id))
+                                                                Icons.Default.Favorite
+                                                        else
+                                                                Icons.Default.FavoriteBorder,
+                                                        contentDescription = "Favorite",
+                                                        tint = if (viewModel.favorites.contains(song.id))
+                                                                AppleSystemPink
+                                                        else
+                                                                contentColor.copy(alpha = 0.7f),
+                                                        modifier = Modifier.size(20.dp)
                                                 )
                                         }
                                 }
 
-                                Spacer(modifier = Modifier.height(24.dp))
-                                
-                                // Favorite Button
-                                IconButton(
-                                        onClick = { viewModel.toggleFavorite(song) },
-                                        modifier = Modifier
-                                                .clip(RoundedCornerShape(16.dp))
-                                                .background(
-                                                        if (viewModel.favorites.contains(song.id))
-                                                                AppleSystemBlue.copy(alpha = 0.2f)
-                                                        else
-                                                                contentColor.copy(alpha = 0.1f)
-                                                )
-                                                .size(48.dp)
-                                ) {
-                                        Icon(
-                                                imageVector = if (viewModel.favorites.contains(song.id))
-                                                        Icons.Default.Favorite
-                                                else 
-                                                        Icons.Default.FavoriteBorder,
-                                                contentDescription = "Favorite",
-                                                tint = if (viewModel.favorites.contains(song.id))
-                                                        AppleSystemBlue
-                                                else
-                                                        contentColor.copy(alpha = 0.7f),
-                                                modifier = Modifier.size(24.dp)
-                                        )
-                                }
-
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(28.dp))
 
                                 // Enhanced Seekbar (Apple Style)
-                                Box(
-                                        modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp)
-                                ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
                                         Slider(
                                                 value = viewModel.progress,
                                                 onValueChange = { viewModel.seekTo(it) },
                                                 colors = SliderDefaults.colors(
                                                         thumbColor = contentColor,
                                                         activeTrackColor = contentColor,
-                                                        inactiveTrackColor = contentColor.copy(alpha = 0.2f),
-                                                        disabledThumbColor = contentColor.copy(alpha = 0.5f),
-                                                        disabledActiveTrackColor = contentColor.copy(alpha = 0.5f)
+                                                        inactiveTrackColor = contentColor.copy(alpha = 0.2f)
                                                 ),
                                                 modifier = Modifier.fillMaxWidth()
                                         )
-                                }
-                                Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                        Text(
-                                                text = formatTime(viewModel.currentPosition),
-                                                style = MaterialTheme.typography.labelMedium.copy(
-                                                        letterSpacing = 0.2.sp
-                                                ),
-                                                color = secondaryColor
-                                        )
-                                        Text(
-                                                text = formatTime(song.duration),
-                                                style = MaterialTheme.typography.labelMedium.copy(
-                                                        letterSpacing = 0.2.sp
-                                                ),
-                                                color = secondaryColor
-                                        )
+                                        Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                                Text(
+                                                        text = formatTime(viewModel.currentPosition),
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        color = secondaryColor
+                                                )
+                                                Text(
+                                                        text = formatTime(song.duration),
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        color = secondaryColor
+                                                )
+                                        }
                                 }
 
                                 Spacer(modifier = Modifier.height(32.dp))
@@ -308,9 +275,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                         // Shuffle
                                         IconButton(
                                                 onClick = { viewModel.toggleShuffle() },
-                                                modifier = Modifier
-                                                        .clip(RoundedCornerShape(12.dp))
-                                                        .size(44.dp)
+                                                modifier = Modifier.size(44.dp)
                                         ) {
                                                 Icon(
                                                         Icons.Default.Shuffle,
@@ -318,7 +283,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                         tint = if (viewModel.isShuffleEnabled)
                                                                 AppleSystemBlue
                                                         else secondaryColor,
-                                                        modifier = Modifier.size(20.dp)
+                                                        modifier = Modifier.size(22.dp)
                                                 )
                                         }
 
@@ -330,7 +295,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                 Icon(
                                                         Icons.Default.SkipPrevious,
                                                         contentDescription = "Previous",
-                                                        modifier = Modifier.size(28.dp),
+                                                        modifier = Modifier.size(36.dp),
                                                         tint = contentColor
                                                 )
                                         }
@@ -338,7 +303,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                         // Play/Pause - Enhanced
                                         Surface(
                                                 modifier = Modifier
-                                                        .size(72.dp)
+                                                        .size(80.dp)
                                                         .clip(CircleShape)
                                                         .clickable { viewModel.togglePlayPause() },
                                                 color = contentColor,
@@ -354,8 +319,8 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                                 else 
                                                                         Icons.Default.PlayArrow,
                                                                 contentDescription = if (viewModel.isPlaying) "Pause" else "Play",
-                                                                tint = SamsungBlack,
-                                                                modifier = Modifier.size(32.dp)
+                                                                tint = AppleCharcoal,
+                                                                modifier = Modifier.size(40.dp)
                                                         )
                                                 }
                                         }
@@ -368,7 +333,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                 Icon(
                                                         Icons.Default.SkipNext,
                                                         contentDescription = "Next",
-                                                        modifier = Modifier.size(28.dp),
+                                                        modifier = Modifier.size(36.dp),
                                                         tint = contentColor
                                                 )
                                         }
@@ -376,9 +341,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                         // Repeat
                                         IconButton(
                                                 onClick = { viewModel.toggleRepeat() },
-                                                modifier = Modifier
-                                                        .clip(RoundedCornerShape(12.dp))
-                                                        .size(44.dp)
+                                                modifier = Modifier.size(44.dp)
                                         ) {
                                                 Icon(
                                                         imageVector = if (viewModel.repeatMode == Player.REPEAT_MODE_ONE)
@@ -390,7 +353,7 @@ fun PlayerScreen(viewModel: MainViewModel, onCollapse: () -> Unit) {
                                                                 AppleSystemBlue
                                                         else
                                                                 secondaryColor,
-                                                        modifier = Modifier.size(20.dp)
+                                                        modifier = Modifier.size(22.dp)
                                                 )
                                         }
                                 }

@@ -95,7 +95,7 @@ fun ImportScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         },
                         colors =
                                 TopAppBarDefaults.topAppBarColors(
-                                        containerColor = SamsungBlack,
+                                        containerColor = AppleCharcoal,
                                         titleContentColor = AppleWhite,
                                         navigationIconContentColor = AppleWhite,
                                         actionIconContentColor = AppleWhite
@@ -109,7 +109,7 @@ fun ImportScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                 viewModel.importSongs(selectedSongs.toList())
                                 onBack()
                             },
-                            containerColor = SamsungBlue,
+                            containerColor = AppleSystemBlue,
                             contentColor = Color.White
                     ) {
                         Row(
@@ -123,7 +123,7 @@ fun ImportScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     }
                 }
             },
-            containerColor = SamsungBlack
+            containerColor = AppleCharcoal
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -144,7 +144,7 @@ fun ImportScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = if (filteredSongs.isEmpty()) AppleGray else SamsungBlue,
+                            tint = if (filteredSongs.isEmpty()) AppleGray else AppleSystemBlue,
                             modifier = Modifier.size(24.dp).clickable {
                                 if (selectedSongs.size == filteredSongs.size) {
                                     selectedSongs.clear()
@@ -164,7 +164,7 @@ fun ImportScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 
                 if (deviceSongs == null) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = SamsungBlue)
+                        CircularProgressIndicator(color = AppleSystemBlue)
                     }
                 } else if (filteredSongs.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -211,7 +211,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit, modifier: Modifier
     Row(
             modifier =
                     modifier
-                            .background(SamsungDarkGray, RoundedCornerShape(12.dp))
+                            .background(AppleGraphite, RoundedCornerShape(12.dp))
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                             .clip(RoundedCornerShape(12.dp)),
             verticalAlignment = Alignment.CenterVertically
@@ -256,7 +256,7 @@ fun ImportSongItem(song: Song, isSelected: Boolean, onToggle: () -> Unit) {
             modifier =
                     Modifier.fillMaxWidth()
                             .clickable { onToggle() }
-                            .background(SamsungBlack)
+                            .background(AppleCharcoal)
                             .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -267,8 +267,8 @@ fun ImportSongItem(song: Song, isSelected: Boolean, onToggle: () -> Unit) {
                         .size(24.dp)
                         .clip(androidx.compose.foundation.shape.CircleShape)
                         .background(
-                                if (isSelected) SamsungBlue
-                                else SamsungDarkGray
+                                if (isSelected) AppleSystemBlue
+                                else AppleGraphite
                         ),
                 contentAlignment = Alignment.Center
         ) {
@@ -287,7 +287,7 @@ fun ImportSongItem(song: Song, isSelected: Boolean, onToggle: () -> Unit) {
                 modifier = Modifier
                         .size(60.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                color = SamsungDarkGray,
+                color = AppleGraphite,
                 shadowElevation = 2.dp
         ) {
             AsyncImage(
@@ -336,7 +336,7 @@ fun AlphabeticalIndex(letters: List<Char>, modifier: Modifier = Modifier) {
                     modifier = Modifier
                             .size(24.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(SamsungDarkGray.copy(alpha = 0.6f)),
+                            .background(AppleGraphite.copy(alpha = 0.6f)),
                     contentAlignment = Alignment.Center
             ) {
                 Text(
