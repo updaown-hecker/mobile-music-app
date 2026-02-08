@@ -554,6 +554,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             // Pause playback
                             player?.pause()
                             sleepTimerActive = false
+                            // Reset settings
+                            val resetSettings = (settings ?: com.updaown.musicapp.data.SettingsEntity()).copy(sleepTimerMinutes = 0)
+                            updateAllSettings(resetSettings)
                             break
                         }
                     }
@@ -612,8 +615,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         player?.setPlaybackParameters(PlaybackParameters(currentSettings.playbackSpeed.coerceIn(0.5f, 2.0f)))
         
         // Apply skip silence (Custom Command)
-        val bundle = Bundle().apply { putBoolean("enabled", currentSettings.skipSilence) }
-        player?.sendCustomCommand(SessionCommand("SET_SKIP_SILENCE", Bundle.EMPTY), bundle)
+        val skipSilenceBundle = Bundle().apply { putBoolean("enabled", currentSettings.skipSilence) }
+        player?.sendCustomCommand(SessionCommand("SET_SKIP_SILENCE", Bundle.EMPTY), skipSilenceBundle)
+
+        // Apply Equalizer
+        val eqBundle = Bundle().apply {
+            putBoolean("enabled", currentSettings.equalizerEnabled)
+            putInt("bass", currentSettings.bass)
+            putInt("midrange", currentSettings.midrange)
+            putInt("treble", currentSettings.treble)
+        }
+        player?.sendCustomCommand(SessionCommand("SET_EQUALIZER", Bundle.EMPTY), eqBundle)
+
+        // Apply Crossfade
+        val crossfadeBundle = Bundle().apply {
+            putInt("duration", currentSettings.crossfadeDuration)
+        }
+        player?.sendCustomCommand(SessionCommand("SET_CROSSFADE", Bundle.EMPTY), crossfadeBundle)
+
+        // Apply Volume Normalization
+        val volumeBundle = Bundle().apply {
+            putBoolean("enabled", currentSettings.volumeNormalization)
+        }
+        player?.sendCustomCommand(SessionCommand("SET_VOLUME_NORMALIZATION", Bundle.EMPTY), volumeBundle)
     }
 
     fun checkForUpdates() {

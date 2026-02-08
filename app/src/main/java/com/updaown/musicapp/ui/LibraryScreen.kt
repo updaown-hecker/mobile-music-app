@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,7 +82,7 @@ fun MainScreen(
                 if (showCreateFolderDialog) {
                         AlertDialog(
                                 onDismissRequest = { showCreateFolderDialog = false },
-                                containerColor = SamsungDarkGray,
+                                containerColor = AppleGraphite,
                                 titleContentColor = AppleWhite,
                                 textContentColor = AppleGray,
                                 title = { Text("New Playlist") },
@@ -93,10 +94,10 @@ fun MainScreen(
                                                 colors =
                                                         TextFieldDefaults.colors(
                                                                 focusedContainerColor =
-                                                                        SamsungBlack,
+                                                                        AppleCharcoal,
                                                                 unfocusedContainerColor =
-                                                                        SamsungBlack,
-                                                                focusedIndicatorColor = SamsungBlue,
+                                                                        AppleCharcoal,
+                                                                focusedIndicatorColor = AppleSystemBlue,
                                                                 unfocusedIndicatorColor =
                                                                         Color.Transparent,
                                                                 focusedTextColor = AppleWhite,
@@ -115,7 +116,7 @@ fun MainScreen(
                                                                 newFolderName = ""
                                                         }
                                                 }
-                                        ) { Text("Create", color = SamsungBlue) }
+                                        ) { Text("Create", color = AppleSystemBlue) }
                                 },
                                 dismissButton = {
                                         TextButton(onClick = { showCreateFolderDialog = false }) {
@@ -126,7 +127,7 @@ fun MainScreen(
                 }
 
                 // Main Background
-                Box(modifier = Modifier.fillMaxSize().background(SamsungBlack)) {
+                Box(modifier = Modifier.fillMaxSize().background(AppleCharcoal)) {
                         if (selectedCollection != null) {
                                 Column(modifier = Modifier.fillMaxSize()) {
                                         val displaySongs =
@@ -163,7 +164,7 @@ fun MainScreen(
                                                         Icon(
                                                                 Icons.AutoMirrored.Filled.ArrowBack,
                                                                 contentDescription = "Back",
-                                                                tint = SamsungBlue
+                                                                tint = AppleSystemBlue
                                                         )
                                                 }
 
@@ -202,7 +203,7 @@ fun MainScreen(
                                                                         Icons.Default.Shuffle,
                                                                         contentDescription =
                                                                                 "Shuffle Play",
-                                                                        tint = SamsungBlue
+                                                                        tint = AppleSystemBlue
                                                                 )
                                                         }
 
@@ -215,7 +216,7 @@ fun MainScreen(
                                                                         Icons.Default.Add,
                                                                         contentDescription =
                                                                                 "Add Songs",
-                                                                        tint = SamsungBlue
+                                                                        tint = AppleSystemBlue
                                                                 )
                                                         }
                                                 }
@@ -255,15 +256,18 @@ fun MainScreen(
                                                 ) {
                                                         Text(
                                                         text = "Library",
-                                                        style = MaterialTheme.typography.displayLarge,
+                                                        style = MaterialTheme.typography.displayLarge.copy(
+                                                                fontWeight = FontWeight.Bold,
+                                                                letterSpacing = (-1.5).sp
+                                                        ),
                                                         color = AppleWhite
                                                 )
                                                         Row {
                                                                 IconButton(
                                                         onClick = onNavigateToSettings,
                                                         modifier = Modifier
-                                                                .clip(RoundedCornerShape(12.dp))
-                                                                .background(AppleGraphite)
+                                                                .clip(RoundedCornerShape(20.dp))
+                                                                .background(AppleSlate)
                                                                 .size(40.dp)
                                                 ) {
                                                         Icon(
@@ -314,50 +318,38 @@ fun MainScreen(
                                                         }
                                                 }
 
-                                                TextField(
-                                                        value = viewModel.searchQuery,
-                                                        onValueChange = {
-                                                                viewModel.onSearchQueryChanged(it)
-                                                        },
+                                                Box(
                                                         modifier = Modifier
                                                                 .fillMaxWidth()
-                                                                .padding(vertical = 8.dp)
-                                                                .shadow(
-                                                                        elevation = 2.dp,
-                                                                        shape = RoundedCornerShape(16.dp),
-                                                                        ambientColor = Color.Black.copy(alpha = 0.1f)
+                                                                .padding(vertical = 12.dp)
+                                                                .height(44.dp)
+                                                                .clip(RoundedCornerShape(10.dp))
+                                                                .background(AppleSlate)
+                                                                .clickable { /* Focus search */ },
+                                                        contentAlignment = Alignment.CenterStart
+                                                ) {
+                                                        Row(
+                                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                                Icon(Icons.Default.Search, null, tint = AppleGray, modifier = Modifier.size(20.dp))
+                                                                Spacer(Modifier.width(8.dp))
+                                                                BasicTextField(
+                                                                        value = viewModel.searchQuery,
+                                                                        onValueChange = { viewModel.onSearchQueryChanged(it) },
+                                                                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = AppleWhite),
+                                                                        singleLine = true,
+                                                                        modifier = Modifier.weight(1f),
+                                                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(AppleSystemBlue),
+                                                                        decorationBox = { innerTextField ->
+                                                                                if (viewModel.searchQuery.isEmpty()) {
+                                                                                        Text("Search", color = AppleGray, style = MaterialTheme.typography.bodyLarge)
+                                                                                }
+                                                                                innerTextField()
+                                                                        }
                                                                 )
-                                                                .clip(RoundedCornerShape(16.dp)),
-                                                        colors = TextFieldDefaults.colors(
-                                                                focusedContainerColor = AppleGraphite,
-                                                                unfocusedContainerColor = AppleGraphite,
-                                                                disabledContainerColor = AppleGraphite,
-                                                                focusedIndicatorColor = Color.Transparent,
-                                                                unfocusedIndicatorColor = Color.Transparent,
-                                                                focusedTextColor = AppleWhite,
-                                                                unfocusedTextColor = AppleWhite,
-                                                                cursorColor = AppleSystemBlue,
-                                                                selectionColors = TextSelectionColors(
-                                                                        handleColor = AppleSystemBlue,
-                                                                        backgroundColor = AppleSystemBlue.copy(alpha = 0.3f)
-                                                                )
-                                                        ),
-                                                        placeholder = {
-                                                                Text(
-                                                                        "Search songs, artists, albums...",
-                                                                        color = AppleGray,
-                                                                        style = MaterialTheme.typography.bodyMedium
-                                                                )
-                                                        },
-                                                        leadingIcon = {
-                                                                Icon(
-                                                                        Icons.Default.Search,
-                                                                        null,
-                                                                        tint = AppleGray
-                                                                )
-                                                        },
-                                                        singleLine = true
-                                                )
+                                                        }
+                                                }
                                         }
 
                                         ScrollableTabRow(
@@ -365,19 +357,10 @@ fun MainScreen(
                                                 containerColor = Color.Transparent,
                                                 contentColor = AppleSystemBlue,
                                                 edgePadding = 16.dp,
-                                                divider = {},
-                                                indicator = { tabPositions ->
-                                                        if (selectedTabIndex < tabPositions.size) {
-                                                                Box(
-                                                                        modifier = Modifier
-                                                                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                                                                                .height(3.dp)
-                                                                                .padding(horizontal = 16.dp)
-                                                                                .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                                                                                .background(AppleSystemBlue)
-                                                                )
-                                                        }
-                                                }
+                                                divider = {
+                                                        HorizontalDivider(thickness = 0.5.dp, color = AppleSlate.copy(alpha = 0.5f))
+                                                },
+                                                indicator = {}
                                         ) {
                                                 tabs.forEachIndexed { index, title ->
                                                         val selected = selectedTabIndex == index
@@ -572,7 +555,7 @@ fun MainScreen(
                                                 ) {
                                                         Text(
                                                                 "Cancel",
-                                                                color = SamsungBlue, // Theme color
+                                                                color = AppleSystemBlue, // Theme color
                                                                 style =
                                                                         MaterialTheme.typography
                                                                                 .bodyLarge,
@@ -605,7 +588,7 @@ fun MainScreen(
                                                                                         .isEmpty()
                                                                         )
                                                                                 AppleGray
-                                                                        else SamsungBlue,
+                                                                        else AppleSystemBlue,
                                                                 style =
                                                                         MaterialTheme.typography
                                                                                 .bodyLarge.copy(
@@ -646,7 +629,7 @@ fun MainScreen(
                                                 Spacer(modifier = Modifier.height(8.dp))
 
                                                 HorizontalDivider(
-                                                        color = SamsungDarkGray,
+                                                        color = AppleGraphite,
                                                         thickness = 1.dp
                                                 )
 
@@ -721,7 +704,7 @@ fun AppleStyleSearchBar(query: String, onQueryChange: (String) -> Unit, placehol
                                 unfocusedIndicatorColor = Color.Transparent,
                                 focusedTextColor = AppleWhite,
                                 unfocusedTextColor = AppleWhite,
-                                cursorColor = SamsungBlue
+                                cursorColor = AppleSystemBlue
                         ),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge
@@ -748,7 +731,7 @@ fun AppleStyleSongItem(song: Song, isSelected: Boolean, onToggle: () -> Unit) {
                                 modifier =
                                         Modifier.size(48.dp)
                                                 .clip(RoundedCornerShape(4.dp))
-                                                .background(SamsungDarkGray),
+                                                .background(AppleGraphite),
                                 contentAlignment = Alignment.Center
                         ) {
                                 Icon(
@@ -800,7 +783,7 @@ fun AppleSelectionCircle(isSelected: Boolean) {
                 modifier =
                         Modifier.size(22.dp)
                                 .clip(androidx.compose.foundation.shape.CircleShape)
-                                .background(if (isSelected) SamsungBlue else Color.Transparent)
+                                .background(if (isSelected) AppleSystemBlue else Color.Transparent)
                                 .then(
                                         if (!isSelected) {
                                                 Modifier.border(

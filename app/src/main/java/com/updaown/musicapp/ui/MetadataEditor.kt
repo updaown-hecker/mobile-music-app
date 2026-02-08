@@ -50,7 +50,7 @@ fun MetadataEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = SamsungDarkGray,
+        containerColor = AppleGraphite,
         modifier = Modifier
             .fillMaxWidth(0.95f)
             .clip(RoundedCornerShape(20.dp)),
@@ -90,7 +90,7 @@ fun MetadataEditorDialog(
                         .fillMaxWidth()
                         .height(180.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(SamsungBlack)
+                        .background(AppleCharcoal)
                         .clickable { imagePickerLauncher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
@@ -157,7 +157,7 @@ fun MetadataEditorDialog(
                     onSave(editedTitle, editedArtist, editedAlbum)
                     onDismiss()
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = SamsungBlue),
+                colors = ButtonDefaults.buttonColors(containerColor = AppleSystemBlue),
                 modifier = Modifier.height(40.dp)
             ) {
                 Text("Save", color = AppleWhite)
@@ -183,7 +183,7 @@ private fun EditTextField(label: String, value: String, onValueChange: (String) 
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
-                .background(SamsungBlack)
+                .background(AppleCharcoal)
                 .padding(12.dp)
         ) {
             BasicTextField(

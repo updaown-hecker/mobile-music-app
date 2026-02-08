@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -52,111 +53,84 @@ fun SongList(
                 return
         }
 
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(8.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(songs) { song ->
-                        SongItemCard(
+                        SongItem(
                                 song = song,
                                 onSongClick = { onSongClick(song) },
-                                onEditClick = { onLongClick(song) }
+                                onMoreClick = { onLongClick(song) }
                         )
                 }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
         }
 }
 
 @Composable
-fun SongItemCard(song: Song, onSongClick: () -> Unit, onEditClick: () -> Unit = {}) {
-        Row(
+fun SongItem(song: Song, onSongClick: () -> Unit, onMoreClick: () -> Unit = {}) {
+        Column(
                 modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(AppleGraphite)
                         .clickable { onSongClick() }
-                        .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-                // Album art with enhanced styling
-                Box(
+                Row(
                         modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(AppleCharcoal)
-                                .shadow(
-                                        elevation = 4.dp,
-                                        shape = RoundedCornerShape(12.dp),
-                                        ambientColor = Color.Black.copy(alpha = 0.3f)
-                                ),
-                        contentAlignment = Alignment.Center
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                        // Album art
                         AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                         .data(song.displayAlbumArt)
                                         .crossfade(true)
-                                        .placeholder(android.R.drawable.ic_media_play)
-                                        .error(android.R.drawable.ic_media_play)
                                         .build(),
                                 contentDescription = "Album Art",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(60.dp)
+                                modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(AppleSlate)
                         )
-                }
 
-                Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                                text = song.displayTitle,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Medium,
-                                        letterSpacing = 0.1.sp
-                                ),
-                                color = AppleWhite,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                                text = song.displayArtist,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                        letterSpacing = 0.2.sp
-                                ),
-                                color = AppleGray,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                        )
-                        if (song.displayAlbum.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(2.dp))
+                        Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                        text = song.displayAlbum,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                                letterSpacing = 0.3.sp
+                                        text = song.displayTitle,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontWeight = FontWeight.Medium
                                         ),
-                                        color = AppleGray.copy(alpha = 0.7f),
+                                        color = AppleWhite,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                        text = song.displayArtist,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = AppleGray,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                 )
                         }
-                }
 
-                IconButton(
-                        onClick = onEditClick,
-                        modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(AppleSlate)
-                                .size(36.dp)
-                ) {
-                        Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Edit",
-                                tint = AppleSystemBlue,
-                                modifier = Modifier.size(18.dp)
-                        )
+                        IconButton(onClick = onMoreClick) {
+                                Icon(
+                                        Icons.Default.MoreVert,
+                                        contentDescription = "More",
+                                        tint = AppleGray,
+                                        modifier = Modifier.size(20.dp)
+                                )
+                        }
                 }
+                HorizontalDivider(
+                        modifier = Modifier.padding(start = 80.dp),
+                        thickness = 0.5.dp,
+                        color = AppleSlate.copy(alpha = 0.5f)
+                )
         }
-        Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
 fun ArtistList(songs: List<Song>, onArtistClick: (String) -> Unit) {
-        val artists = songs.map { it.displayArtist }.distinct()
+        val artists = songs.map { it.displayArtist }.distinct().sorted()
 
         if (artists.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -165,50 +139,49 @@ fun ArtistList(songs: List<Song>, onArtistClick: (String) -> Unit) {
                 return
         }
 
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(10.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(artists) { artist ->
-                        Row(
-                                modifier =
-                                        Modifier.fillMaxWidth()
-                                                .clip(RoundedCornerShape(14.dp))
-                                                .background(SamsungDarkGray)
-                                                .clickable { onArtistClick(artist) }
-                                                .padding(18.dp, 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                        Column(
+                                modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onArtistClick(artist) }
                         ) {
-                                Text(
-                                        artist,
-                                        style =
-                                                MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.SemiBold
-                                                ),
-                                        color = AppleWhite,
-                                        modifier = Modifier.weight(1f),
-                                        maxLines = 1
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Surface(
-                                        color = SamsungLightGray,
-                                        shape = RoundedCornerShape(8.dp),
-                                        modifier = Modifier.padding(start = 8.dp)
+                                Row(
+                                        modifier = Modifier
+                                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                         Text(
-                                                "${songs.filter { it.displayArtist == artist }.size}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = AppleGray,
-                                                modifier = Modifier.padding(6.dp, 4.dp)
+                                                artist,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                ),
+                                                color = AppleWhite,
+                                                modifier = Modifier.weight(1f),
+                                                maxLines = 1
+                                        )
+                                        Icon(
+                                                imageVector = Icons.Default.SkipNext,
+                                                contentDescription = null,
+                                                tint = AppleSlate,
+                                                modifier = Modifier.size(16.dp)
                                         )
                                 }
+                                HorizontalDivider(
+                                        modifier = Modifier.padding(start = 16.dp),
+                                        thickness = 0.5.dp,
+                                        color = AppleSlate.copy(alpha = 0.5f)
+                                )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
                 }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
         }
 }
 
 @Composable
 fun AlbumList(songs: List<Song>, onAlbumClick: (String) -> Unit) {
-        val albums = songs.map { it.displayAlbum }.distinct()
+        val albums = songs.map { it.displayAlbum }.distinct().sorted()
 
         if (albums.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -217,44 +190,43 @@ fun AlbumList(songs: List<Song>, onAlbumClick: (String) -> Unit) {
                 return
         }
 
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(10.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(albums) { album ->
-                        Row(
-                                modifier =
-                                        Modifier.fillMaxWidth()
-                                                .clip(RoundedCornerShape(14.dp))
-                                                .background(SamsungDarkGray)
-                                                .clickable { onAlbumClick(album) }
-                                                .padding(18.dp, 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                        Column(
+                                modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onAlbumClick(album) }
                         ) {
-                                Text(
-                                        album,
-                                        style =
-                                                MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.SemiBold
-                                                ),
-                                        color = AppleWhite,
-                                        modifier = Modifier.weight(1f),
-                                        maxLines = 1
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Surface(
-                                        color = SamsungLightGray,
-                                        shape = RoundedCornerShape(8.dp),
-                                        modifier = Modifier.padding(start = 8.dp)
+                                Row(
+                                        modifier = Modifier
+                                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                         Text(
-                                                "${songs.filter { it.displayAlbum == album }.size}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = AppleGray,
-                                                modifier = Modifier.padding(6.dp, 4.dp)
+                                                album,
+                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                ),
+                                                color = AppleWhite,
+                                                modifier = Modifier.weight(1f),
+                                                maxLines = 1
+                                        )
+                                        Icon(
+                                                imageVector = Icons.Default.SkipNext,
+                                                contentDescription = null,
+                                                tint = AppleSlate,
+                                                modifier = Modifier.size(16.dp)
                                         )
                                 }
+                                HorizontalDivider(
+                                        modifier = Modifier.padding(start = 16.dp),
+                                        thickness = 0.5.dp,
+                                        color = AppleSlate.copy(alpha = 0.5f)
+                                )
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
                 }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
         }
 }
 
@@ -264,184 +236,177 @@ fun FolderList(
         playlists: List<PlaylistEntity>,
         onCollectionClick: (SelectedCollection) -> Unit
 ) {
-        val folders = songs.map { it.folderName }.distinct()
+        val folders = songs.map { it.folderName }.distinct().sorted()
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                // Grid of playlist cards (Samsung Music style)
                 item {
                         if (playlists.isNotEmpty()) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                                         Text(
                                                 "Playlists",
-                                                style =
-                                                        MaterialTheme.typography.titleLarge.copy(
-                                                                fontWeight = FontWeight.Bold
-                                                        ),
+                                                style = MaterialTheme.typography.titleLarge.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                ),
                                                 color = AppleWhite,
                                                 modifier = Modifier.padding(bottom = 12.dp)
                                         )
 
-                                        // Grid layout for playlists
-                                        Column(modifier = Modifier.fillMaxWidth()) {
-                                                var index = 0
-                                                while (index < playlists.size) {
-                                                        Row(
-                                                                modifier =
-                                                                        Modifier.fillMaxWidth()
-                                                                                .padding(
-                                                                                        bottom =
-                                                                                                12.dp
-                                                                                ),
-                                                                horizontalArrangement =
-                                                                        Arrangement.spacedBy(12.dp)
-                                                        ) {
-                                                                repeat(2) {
-                                                                        if (index < playlists.size
-                                                                        ) {
-                                                                                val playlist =
-                                                                                        playlists[
-                                                                                                index]
-                                                                                PlaylistGridCard(
-                                                                                        name =
-                                                                                                playlist.name,
-                                                                                        onClick = {
-                                                                                                onCollectionClick(
-                                                                                                        SelectedCollection
-                                                                                                                .Playlist(
-                                                                                                                        playlist
-                                                                                                                )
-                                                                                                )
-                                                                                        },
-                                                                                        modifier =
-                                                                                                Modifier.weight(
-                                                                                                        1f
-                                                                                                )
-                                                                                )
-                                                                                index++
-                                                                        } else {
-                                                                                Box(
-                                                                                        modifier =
-                                                                                                Modifier.weight(
-                                                                                                        1f
-                                                                                                )
-                                                                                )
-                                                                        }
-                                                                }
-                                                        }
+                                        Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        ) {
+                                                playlists.take(2).forEach { playlist ->
+                                                        PlaylistGridCard(
+                                                                name = playlist.name,
+                                                                onClick = {
+                                                                        onCollectionClick(SelectedCollection.Playlist(playlist))
+                                                                },
+                                                                modifier = Modifier.weight(1f)
+                                                        )
+                                                }
+                                                if (playlists.size < 2) {
+                                                        Box(modifier = Modifier.weight(1f))
+                                                }
+                                        }
+
+                                        if (playlists.size > 2) {
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                playlists.drop(2).forEach { playlist ->
+                                                        PlaylistListItem(playlist, onCollectionClick)
                                                 }
                                         }
                                 }
-
-                                Spacer(modifier = Modifier.height(16.dp))
                         }
                 }
 
-                // List of folders
                 if (folders.isNotEmpty()) {
                         item {
                                 Text(
                                         "Folders",
-                                        style =
-                                                MaterialTheme.typography.titleLarge.copy(
-                                                        fontWeight = FontWeight.Bold
-                                                ),
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold
+                                        ),
                                         color = AppleWhite,
-                                        modifier = Modifier.padding(16.dp, 0.dp, 16.dp, 12.dp)
+                                        modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 12.dp)
                                 )
                         }
 
                         items(folders) { folder ->
-                                Row(
-                                        modifier =
-                                                Modifier.fillMaxWidth()
-                                                        .clip(RoundedCornerShape(14.dp))
-                                                        .background(SamsungDarkGray)
-                                                        .clickable {
-                                                                onCollectionClick(
-                                                                        SelectedCollection.Folder(
-                                                                                folder
-                                                                        )
-                                                                )
-                                                        }
-                                                        .padding(18.dp, 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                Column(
+                                        modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { onCollectionClick(SelectedCollection.Folder(folder)) }
                                 ) {
-                                        Icon(
-                                                Icons.Default.Folder,
-                                                contentDescription = null,
-                                                tint = SamsungBlue,
-                                                modifier = Modifier.size(28.dp)
-                                        )
-                                        Column(modifier = Modifier.weight(1f)) {
-                                                Text(
-                                                        folder,
-                                                        style =
-                                                                MaterialTheme.typography.titleMedium
-                                                                        .copy(
-                                                                                fontWeight =
-                                                                                        FontWeight
-                                                                                                .SemiBold
-                                                                        ),
-                                                        color = AppleWhite,
-                                                        maxLines = 1
+                                        Row(
+                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        ) {
+                                                Icon(
+                                                        Icons.Default.Folder,
+                                                        contentDescription = null,
+                                                        tint = AppleSystemBlue,
+                                                        modifier = Modifier.size(24.dp)
                                                 )
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                        "${songs.filter { it.folderName == folder }.size} songs",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = AppleGray
-                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                                folder,
+                                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                                        fontWeight = FontWeight.Medium
+                                                                ),
+                                                                color = AppleWhite,
+                                                                maxLines = 1
+                                                        )
+                                                        Text(
+                                                                "${songs.filter { it.folderName == folder }.size} songs",
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = AppleGray
+                                                        )
+                                                }
                                         }
+                                        HorizontalDivider(
+                                                modifier = Modifier.padding(start = 56.dp),
+                                                thickness = 0.5.dp,
+                                                color = AppleSlate.copy(alpha = 0.5f)
+                                        )
                                 }
-                                Spacer(modifier = Modifier.height(6.dp))
                         }
                 }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
+        }
+}
+
+@Composable
+fun PlaylistListItem(playlist: PlaylistEntity, onCollectionClick: (SelectedCollection) -> Unit) {
+        Column(
+                modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onCollectionClick(SelectedCollection.Playlist(playlist)) }
+        ) {
+                Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                        Box(
+                                modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(AppleSlate),
+                                contentAlignment = Alignment.Center
+                        ) {
+                                Icon(Icons.Default.Folder, null, tint = AppleSystemBlue, modifier = Modifier.size(20.dp))
+                        }
+                        Text(
+                                playlist.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = AppleWhite,
+                                modifier = Modifier.weight(1f)
+                        )
+                }
+                HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        thickness = 0.5.dp,
+                        color = AppleSlate.copy(alpha = 0.5f)
+                )
         }
 }
 
 @Composable
 private fun PlaylistGridCard(name: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
         Column(
-                modifier =
-                        modifier.clip(RoundedCornerShape(14.dp))
-                                .background(SamsungDarkGray)
-                                .clickable { onClick() }
-                                .padding(0.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = modifier
+                        .clickable { onClick() }
+                        .padding(bottom = 8.dp),
+                horizontalAlignment = Alignment.Start
         ) {
-                // Icon box
                 Box(
-                        modifier =
-                                Modifier.fillMaxWidth()
-                                        .aspectRatio(1f)
-                                        .background(SamsungLightGray),
+                        modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(AppleSlate),
                         contentAlignment = Alignment.Center
                 ) {
                         Icon(
                                 Icons.Default.Folder,
                                 contentDescription = null,
-                                tint = SamsungBlue,
-                                modifier = Modifier.size(50.dp)
+                                tint = AppleSystemBlue,
+                                modifier = Modifier.size(48.dp)
                         )
                 }
 
-                // Text section
-                Column(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        horizontalAlignment = Alignment.Start
-                ) {
-                        Text(
-                                name,
-                                style =
-                                        MaterialTheme.typography.titleSmall.copy(
-                                                fontWeight = FontWeight.SemiBold
-                                        ),
-                                color = AppleWhite,
-                                maxLines = 2
-                        )
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                        name,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                        ),
+                        color = AppleWhite,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                )
         }
 }
 
@@ -457,116 +422,95 @@ fun MiniPlayer(
         onDragUp: () -> Unit = {},
         modifier: Modifier = Modifier
 ) {
-        Column(
-                modifier =
-                        modifier.fillMaxWidth()
-                                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
-                                .background(SamsungLightGray)
-                                .pointerInput(Unit) {
-                                        detectVerticalDragGestures { _, dragAmount ->
-                                                if (dragAmount < -50) { // Drag up to expand
-                                                        onDragUp()
-                                                }
-                                        }
+        Box(
+                modifier = modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .height(64.dp)
+                        .shadow(20.dp, RoundedCornerShape(14.dp), ambientColor = Color.Black)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(GlassBackground)
+                        .pointerInput(Unit) {
+                                detectVerticalDragGestures { _, dragAmount ->
+                                        if (dragAmount < -30) onDragUp()
                                 }
-        ) {
-                // Drag handle
-                Box(
-                        modifier =
-                                Modifier.align(Alignment.CenterHorizontally)
-                                        .padding(top = 10.dp)
-                                        .width(44.dp)
-                                        .height(5.dp)
-                                        .clip(RoundedCornerShape(2.5f.dp))
-                                        .background(AppleGray.copy(alpha = 0.4f))
-                )
-
-                Row(
-                        modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                        // Album art with default placeholder
-                        Box(
-                                modifier =
-                                        Modifier.size(56.dp)
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .background(SamsungBlack),
-                                contentAlignment = Alignment.Center
-                        ) {
-                                AsyncImage(
-                                        model =
-                                                ImageRequest.Builder(LocalContext.current)
-                                                        .data(song.displayAlbumArt)
-                                                        .crossfade(true)
-                                                        .build(),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(56.dp)
-                                )
                         }
+                        .clickable { onClick() }
+        ) {
+                Row(
+                        modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                        AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                        .data(song.displayAlbumArt)
+                                        .crossfade(true)
+                                        .build(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .shadow(4.dp, RoundedCornerShape(6.dp))
+                        )
 
                         Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                         song.displayTitle,
-                                        style =
-                                                MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.SemiBold
-                                                ),
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                                letterSpacing = (-0.2).sp
+                                        ),
                                         color = AppleWhite,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                 )
-                                Spacer(modifier = Modifier.height(3.dp))
                                 Text(
                                         song.displayArtist,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = AppleGray,
-                                        maxLines = 1
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                 )
                         }
 
-                        // Controls
-                        IconButton(onClick = onPreviousClick, modifier = Modifier.size(36.dp)) {
-                                Icon(
-                                        imageVector = Icons.Default.SkipPrevious,
-                                        contentDescription = "Previous",
-                                        tint = SamsungBlue,
-                                        modifier = Modifier.size(20.dp)
-                                )
-                        }
-
-                        IconButton(onClick = { onTogglePlay() }, modifier = Modifier.size(36.dp)) {
-                                if (isPlaying) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                IconButton(onClick = { onTogglePlay() }, modifier = Modifier.size(40.dp)) {
                                         Icon(
-                                                imageVector = Icons.Default.Pause,
-                                                contentDescription = "Pause",
-                                                tint = SamsungBlue
+                                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                                contentDescription = null,
+                                                tint = AppleWhite,
+                                                modifier = Modifier.size(32.dp)
                                         )
-                                } else {
+                                }
+                                IconButton(onClick = onNextClick, modifier = Modifier.size(40.dp)) {
                                         Icon(
-                                                imageVector = Icons.Default.PlayArrow,
-                                                contentDescription = "Play",
-                                                tint = SamsungBlue
+                                                imageVector = Icons.Default.SkipNext,
+                                                contentDescription = null,
+                                                tint = AppleWhite,
+                                                modifier = Modifier.size(32.dp)
                                         )
                                 }
                         }
-
-                        IconButton(onClick = onNextClick, modifier = Modifier.size(36.dp)) {
-                                Icon(
-                                        imageVector = Icons.Default.SkipNext,
-                                        contentDescription = "Next",
-                                        tint = SamsungBlue,
-                                        modifier = Modifier.size(20.dp)
-                                )
-                        }
                 }
 
-                // Progress Bar (Bottom of MiniPlayer)
-                LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth().height(2.dp),
-                        color = SamsungBlue,
-                        trackColor = Color.Transparent
-                )
+                // Thin progress bar at the bottom
+                Box(
+                        modifier = Modifier
+                                .fillMaxWidth()
+                                .height(2.dp)
+                                .align(Alignment.BottomCenter)
+                                .background(AppleWhite.copy(alpha = 0.1f))
+                ) {
+                        Box(
+                                modifier = Modifier
+                                        .fillMaxWidth(progress)
+                                        .fillMaxHeight()
+                                        .background(AppleWhite.copy(alpha = 0.5f))
+                        )
+                }
         }
 }

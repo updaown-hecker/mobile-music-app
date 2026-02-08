@@ -3,19 +3,7 @@ package com.updaown.musicapp.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,350 +12,276 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.updaown.musicapp.data.SettingsEntity
-import com.updaown.musicapp.ui.theme.AppleGray
-import com.updaown.musicapp.ui.theme.AppleWhite
-import com.updaown.musicapp.ui.theme.SamsungBlack
-import com.updaown.musicapp.ui.theme.SamsungBlue
-import com.updaown.musicapp.ui.theme.SamsungDarkGray
-import com.updaown.musicapp.ui.theme.SamsungLightGray
+import com.updaown.musicapp.ui.theme.*
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val settings = viewModel.settings ?: SettingsEntity()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Settings", fontWeight = FontWeight.SemiBold, color = AppleWhite) },
+            LargeTopAppBar(
+                title = { Text("Settings", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = AppleWhite)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = AppleSystemBlue)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SamsungBlack)
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = AppleCharcoal,
+                    titleContentColor = AppleWhite,
+                    scrolledContainerColor = AppleCharcoal
+                )
             )
         },
-        containerColor = SamsungBlack
+        containerColor = AppleCharcoal
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SettingsSection("Playback") {
-                SettingsSwitchItem(Icons.Default.Shuffle, "Shuffle", "Randomize playback order", settings.shuffleEnabled) {
+            SettingsGroup("PLAYBACK") {
+                SettingsSwitchItem(Icons.Default.Shuffle, "Shuffle", settings.shuffleEnabled, AppleSystemBlue) {
                     viewModel.updateAllSettings(settings.copy(shuffleEnabled = it))
                 }
-                SettingsModeChips("Repeat", settings.repeatMode, listOf("Off", "One", "All")) {
-                    viewModel.updateAllSettings(settings.copy(repeatMode = it))
+                SettingsModeItem("Repeat", listOf("Off", "One", "All")[settings.repeatMode], AppleSystemBlue) {
+                    val next = (settings.repeatMode + 1) % 3
+                    viewModel.updateAllSettings(settings.copy(repeatMode = next))
                 }
-                SettingsSliderItem(Icons.Default.Speed, "Playback Speed", "0.5x to 2.0x", settings.playbackSpeed, 0.5f..2f, "x") {
+                SettingsSliderItem(Icons.Default.Speed, "Playback Speed", settings.playbackSpeed, 0.5f..2.0f, "x", AppleSystemOrange) {
                     viewModel.updateAllSettings(settings.copy(playbackSpeed = it))
                 }
-                SettingsSwitchItem(Icons.Default.GraphicEq, "Skip Silence", "Automatically skip silent segments", settings.skipSilence) {
+                SettingsSwitchItem(Icons.Default.GraphicEq, "Skip Silence", settings.skipSilence, AppleSystemGreen) {
                     viewModel.updateAllSettings(settings.copy(skipSilence = it))
                 }
-                SettingsSliderItem(Icons.Default.Hearing, "Crossfade", "Smooth transition between songs", settings.crossfadeDuration.toFloat(), 0f..6f, "s") {
+                SettingsSliderItem(Icons.Default.Hearing, "Crossfade", settings.crossfadeDuration.toFloat(), 0f..6f, "s", AppleSystemPink) {
                     viewModel.updateAllSettings(settings.copy(crossfadeDuration = it.toInt()))
                 }
-                SettingsSwitchItem(Icons.Default.Repeat, "Gapless Playback", "No silence between tracks", settings.gaplessPlayback) {
+                SettingsSwitchItem(Icons.Default.Repeat, "Gapless Playback", settings.gaplessPlayback, AppleSystemIndigo) {
                     viewModel.updateAllSettings(settings.copy(gaplessPlayback = it))
                 }
             }
 
-            SettingsSection("Audio") {
-                SettingsSwitchItem(Icons.AutoMirrored.Filled.VolumeUp, "Volume Normalization", "Equalize volume across tracks", settings.volumeNormalization) {
+            SettingsGroup("AUDIO") {
+                SettingsSwitchItem(Icons.AutoMirrored.Filled.VolumeUp, "Volume Normalization", settings.volumeNormalization, AppleSystemTeal) {
                     viewModel.updateAllSettings(settings.copy(volumeNormalization = it))
                 }
-                SettingsSwitchItem(Icons.Default.Equalizer, "Equalizer", "Adjust audio quality", settings.equalizerEnabled) {
+                SettingsSwitchItem(Icons.Default.Equalizer, "Equalizer", settings.equalizerEnabled, AppleSystemPurple) {
                     viewModel.updateEqualizerEnabled(it)
                 }
-                if (settings.equalizerEnabled) EqualizerSettings(settings, viewModel)
+                if (settings.equalizerEnabled) {
+                    EqualizerControls(settings, viewModel)
+                }
             }
 
-            SettingsSection("Display") {
-                SettingsSwitchItem(Icons.Default.Brightness7, "Dark Theme", "Dark mode enabled", settings.darkThemeEnabled) {
+            SettingsGroup("FEATURES") {
+                SettingsModeItem("Sleep Timer", if (settings.sleepTimerMinutes > 0) "${settings.sleepTimerMinutes}m" else "Off", AppleSystemOrange) {
+                    val options = listOf(0, 5, 10, 15, 30, 45, 60)
+                    val nextIndex = (options.indexOf(settings.sleepTimerMinutes) + 1) % options.size
+                    viewModel.updateSleepTimer(options[nextIndex])
+                }
+                SettingsSwitchItem(Icons.Default.Vibration, "Haptic Feedback", settings.hapticFeedback, AppleSystemPink) {
+                    viewModel.updateAllSettings(settings.copy(hapticFeedback = it))
+                }
+            }
+
+            SettingsGroup("DISPLAY") {
+                SettingsSwitchItem(Icons.Default.Brightness7, "Dark Theme", settings.darkThemeEnabled, AppleGray) {
                     viewModel.updateAllSettings(settings.copy(darkThemeEnabled = it))
                 }
-                SettingsSwitchItem(Icons.Default.Contrast, "OLED Theme", "Pure black for OLED screens", settings.amoledTheme) {
+                SettingsSwitchItem(Icons.Default.Contrast, "OLED Theme", settings.amoledTheme, Color.Black) {
                     viewModel.updateAllSettings(settings.copy(amoledTheme = it))
                 }
             }
 
-            SettingsSection("Features") {
-                SleepTimerSetting(settings, viewModel)
-                SettingsSwitchItem(Icons.Default.Vibration, "Haptic Feedback", "Vibration on actions", settings.hapticFeedback) {
-                    viewModel.updateAllSettings(settings.copy(hapticFeedback = it))
+            SettingsGroup("LIBRARY") {
+                SettingsModeItem("Sort Order", settings.sortOrder, AppleSystemBlue) {
+                    val orders = listOf("Title", "Artist", "Album", "DateAdded")
+                    val nextIndex = (orders.indexOf(settings.sortOrder) + 1) % orders.size
+                    viewModel.updateAllSettings(settings.copy(sortOrder = orders[nextIndex]))
                 }
-                SettingsSwitchItem(Icons.Default.LibraryMusic, "Audio Visualization", "Show waveform during playback", settings.audioVisualization) {
-                    viewModel.updateAllSettings(settings.copy(audioVisualization = it))
-                }
-                SettingsSwitchItem(Icons.AutoMirrored.Filled.Notes, "Show Lyrics", "Display lyrics while playing", settings.showLyrics) {
-                    viewModel.updateAllSettings(settings.copy(showLyrics = it))
-                }
-            }
-
-            SettingsSection("Notifications") {
-                SettingsSwitchItem(Icons.Default.Notifications, "Show Notification", "Display player notification", settings.showNotification) {
-                    viewModel.updateAllSettings(settings.copy(showNotification = it))
-                }
-                SettingsSwitchItem(Icons.Default.Lock, "Lock Screen Controls", "Show controls on lock screen", settings.notificationOnLockScreen) {
-                    viewModel.updateAllSettings(settings.copy(notificationOnLockScreen = it))
-                }
-            }
-
-            SettingsSection("Library") {
-                SortOrderSetting(settings) { viewModel.updateAllSettings(settings.copy(sortOrder = it)) }
-                SettingsSwitchItem(Icons.Default.Sync, "Auto Scan Library", "Automatically detect new songs", settings.autoScanLibrary) {
+                SettingsSwitchItem(Icons.Default.Sync, "Auto Scan Library", settings.autoScanLibrary, AppleSystemBlue) {
                     viewModel.updateAllSettings(settings.copy(autoScanLibrary = it))
                 }
-                SettingsSwitchItem(Icons.Default.Image, "Cache Album Art", "Store album artwork locally", settings.cacheAlbumArt) {
-                    viewModel.updateAllSettings(settings.copy(cacheAlbumArt = it))
-                }
             }
         }
     }
 }
 
 @Composable
-private fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(SamsungDarkGray.copy(alpha = 0.95f))
-            .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(title, style = MaterialTheme.typography.titleMedium, color = SamsungBlue, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(2.dp))
-        content()
-    }
-}
-
-@Composable
-private fun SettingsModeChips(label: String, current: Int, options: List<String>, onSelect: (Int) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(label, color = AppleWhite, style = MaterialTheme.typography.bodyLarge)
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = AppleGray,
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(AppleGraphite)
         ) {
-            options.forEachIndexed { index, text ->
-                Button(
-                    onClick = { onSelect(index) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (current == index) SamsungBlue else SamsungLightGray,
-                        contentColor = AppleWhite
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) { Text(text) }
-            }
+            content()
         }
     }
 }
 
 @Composable
-private fun EqualizerSettings(settings: SettingsEntity, viewModel: MainViewModel) {
+fun SettingsSwitchItem(icon: ImageVector, title: String, isEnabled: Boolean, iconColor: Color, onToggle: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(iconColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = AppleWhite, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(title, color = AppleWhite, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = AppleWhite,
+                checkedTrackColor = AppleSystemGreen,
+                uncheckedThumbColor = AppleWhite,
+                uncheckedTrackColor = AppleSlate
+            )
+        )
+    }
+}
+
+@Composable
+fun SettingsModeItem(title: String, current: String, iconColor: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(iconColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Tune, null, tint = AppleWhite, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(title, color = AppleWhite, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Text(current, color = AppleGray, style = MaterialTheme.typography.bodyLarge)
+        Icon(Icons.Default.ChevronRight, null, tint = AppleSlate, modifier = Modifier.size(20.dp))
+    }
+}
+
+@Composable
+fun SettingsSliderItem(icon: ImageVector, title: String, value: Float, range: ClosedFloatingPointRange<Float>, unit: String, iconColor: Color, onValueChange: (Float) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(SamsungLightGray.copy(alpha = 0.9f))
-            .padding(12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(iconColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, tint = AppleWhite, modifier = Modifier.size(18.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(title, color = AppleWhite, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+            Text(String.format("%.1f%s", value, unit), color = AppleGray, style = MaterialTheme.typography.bodyLarge)
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = range,
+            colors = SliderDefaults.colors(
+                thumbColor = AppleWhite,
+                activeTrackColor = AppleSystemBlue,
+                inactiveTrackColor = AppleSlate
+            )
+        )
+    }
+}
+
+@Composable
+fun EqualizerControls(settings: SettingsEntity, viewModel: MainViewModel) {
+    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Text("PRESETS", style = MaterialTheme.typography.labelSmall, color = AppleGray)
+        Spacer(Modifier.height(8.dp))
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val presets = listOf("Normal", "Bass", "Treble", "Vocal", "Classical", "Jazz", "Pop")
             presets.forEach { preset ->
-                Button(
+                FilterChip(
+                    selected = settings.equalizerPreset == preset,
                     onClick = { viewModel.updateEqualizerPreset(preset) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (settings.equalizerPreset == preset) SamsungBlue else SamsungDarkGray,
-                        contentColor = AppleWhite
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                ) { Text(preset) }
+                    label = { Text(preset) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = AppleSystemBlue,
+                        selectedLabelColor = AppleWhite,
+                        labelColor = AppleGray
+                    )
+                )
             }
         }
-        EqualizerSlider("Bass", settings.bass, viewModel::updateBass)
-        EqualizerSlider("Midrange", settings.midrange, viewModel::updateMidrange)
-        EqualizerSlider("Treble", settings.treble, viewModel::updateTreble)
+        Spacer(Modifier.height(16.dp))
+        EqualizerSliderRow("Bass", settings.bass) { viewModel.updateBass(it) }
+        EqualizerSliderRow("Midrange", settings.midrange) { viewModel.updateMidrange(it) }
+        EqualizerSliderRow("Treble", settings.treble) { viewModel.updateTreble(it) }
     }
 }
 
 @Composable
-private fun EqualizerSlider(label: String, value: Int, onValueChange: (Int) -> Unit) {
-    Column(Modifier.padding(top = 10.dp)) {
+fun EqualizerSliderRow(label: String, value: Int, onValueChange: (Int) -> Unit) {
+    Column(Modifier.padding(vertical = 4.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, color = AppleGray)
-            Text(value.toString(), color = AppleWhite)
+            Text(label, color = AppleWhite, style = MaterialTheme.typography.bodyMedium)
+            Text(value.toString(), color = AppleGray, style = MaterialTheme.typography.bodyMedium)
         }
         Slider(
             value = value.toFloat(),
             onValueChange = { onValueChange(it.toInt()) },
             valueRange = -10f..10f,
             steps = 19,
-            colors = SliderDefaults.colors(thumbColor = SamsungBlue, activeTrackColor = SamsungBlue, inactiveTrackColor = SamsungDarkGray)
-        )
-    }
-}
-
-@Composable
-private fun SortOrderSetting(settings: SettingsEntity, onSortChange: (String) -> Unit) {
-    val options = listOf("Title", "Artist", "Album", "DateAdded")
-    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text("Sort by", color = AppleWhite, style = MaterialTheme.typography.bodyLarge)
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            options.forEach { option ->
-                Button(
-                    onClick = { onSortChange(option) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (settings.sortOrder == option) SamsungBlue else SamsungLightGray,
-                        contentColor = AppleWhite
-                    ),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                ) { Text(option, style = MaterialTheme.typography.bodySmall) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsSwitchItem(icon: ImageVector, title: String, description: String, isEnabled: Boolean, onToggle: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onToggle(!isEnabled) }
-            .background(SamsungLightGray.copy(alpha = 0.42f))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(SamsungBlue.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = SamsungBlue, modifier = Modifier.size(18.dp))
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, color = AppleWhite, style = MaterialTheme.typography.bodyLarge)
-            Text(description, color = AppleGray, style = MaterialTheme.typography.bodySmall)
-        }
-        Switch(
-            checked = isEnabled,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(checkedThumbColor = AppleWhite, checkedTrackColor = SamsungBlue)
-        )
-    }
-}
-
-@Composable
-private fun SettingsSliderItem(icon: ImageVector, title: String, description: String, value: Float, range: ClosedFloatingPointRange<Float>, unit: String = "", onValueChange: (Float) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(SamsungLightGray.copy(alpha = 0.42f))
-            .padding(horizontal = 12.dp, vertical = 10.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = SamsungBlue, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(title, color = AppleWhite)
-                Text(description, color = AppleGray, style = MaterialTheme.typography.bodySmall)
-            }
-            Text(String.format("%.1f%s", value, unit), color = AppleWhite)
-        }
-        Slider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = range,
-            colors = SliderDefaults.colors(thumbColor = SamsungBlue, activeTrackColor = SamsungBlue, inactiveTrackColor = SamsungDarkGray)
-        )
-    }
-}
-
-@Composable
-private fun SleepTimerSetting(settings: SettingsEntity, viewModel: MainViewModel) {
-    var showTimerDialog by remember { mutableStateOf(false) }
-    val timerOptions = listOf(0, 5, 10, 15, 30, 45, 60)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { showTimerDialog = true }
-            .background(SamsungLightGray.copy(alpha = 0.42f))
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(Icons.Default.Timer, contentDescription = null, tint = SamsungBlue, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text("Sleep Timer", color = AppleWhite)
-            Text(if (settings.sleepTimerMinutes > 0) "${settings.sleepTimerMinutes} minutes" else "Off", color = AppleGray)
-        }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = AppleGray)
-    }
-
-    if (showTimerDialog) {
-        AlertDialog(
-            onDismissRequest = { showTimerDialog = false },
-            containerColor = SamsungDarkGray,
-            title = { Text("Sleep Timer", color = AppleWhite) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    timerOptions.forEach { minutes ->
-                        Row(modifier = Modifier.fillMaxWidth().clickable {
-                            viewModel.updateSleepTimer(minutes)
-                            showTimerDialog = false
-                        }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = settings.sleepTimerMinutes == minutes,
-                                onClick = {
-                                    viewModel.updateSleepTimer(minutes)
-                                    showTimerDialog = false
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = SamsungBlue, unselectedColor = AppleGray)
-                            )
-                            Text(if (minutes == 0) "Off" else "$minutes minutes", color = AppleWhite)
-                        }
-                    }
-                }
-            },
-            confirmButton = {}
+            colors = SliderDefaults.colors(
+                thumbColor = AppleWhite,
+                activeTrackColor = AppleSystemBlue,
+                inactiveTrackColor = AppleSlate
+            )
         )
     }
 }
