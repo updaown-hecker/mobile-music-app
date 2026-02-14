@@ -14,9 +14,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher_custom"
         android:label="Updaown Music"
-        android:roundIcon="@drawable/ic_launcher_round"
+        android:roundIcon="@drawable/ic_launcher_custom"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.NoTitleBar"
         tools:targetApi="31">
